@@ -65,6 +65,10 @@ safesmsExport.deleteSMS = function(filter, successCallback, failureCallback) {
 	cordova.exec( successCallback, failureCallback, 'SMS', 'deleteSMS', [ filter ] );
 };
 
+safesmsExport.setReadSMS = function(filter, readVal, successCallback, failureCallback) {
+        cordova.exec( successCallback, failureCallback, 'SMS', 'setReadSMS', [ filter, readVal ] );
+};
+
 safesmsExport.restoreSMS = function(msg, successCallback, failureCallback) {
 	var smsList = [];
 	if(Array.isArray(msg)) {
