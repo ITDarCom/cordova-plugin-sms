@@ -38,6 +38,7 @@ extends CordovaPlugin {
     private static final String ACTION_ENABLE_INTERCEPT = "enableIntercept";
     private static final String ACTION_LIST_SMS = "listSMS";
     private static final String ACTION_DELETE_SMS = "deleteSMS";
+    private static final String ACTION_SET_READ_SMS = "setReadSMS";
     private static final String ACTION_RESTORE_SMS = "restoreSMS";
     private static final String ACTION_SEND_SMS = "sendSMS";
     
@@ -101,8 +102,12 @@ extends CordovaPlugin {
             boolean on_off = inputs.optBoolean(0);
             result = this.enableIntercept(on_off, callbackContext);
         } else if (ACTION_DELETE_SMS.equals(action)) {
-            JSONObject msg = inputs.optJSONObject(0);
-            result = this.deleteSMS(msg, callbackContext);
+            JSONObject filter = inputs.optJSONObject(0);
+            result = this.deleteSMS(filter, callbackContext);
+        } else if (ACTION_SET_READ_SMS.equals(action)) {
+            JSONObject filter = inputs.optJSONObject(0);
+            Boolean readVal = inputs.optBoolean(1);
+            result = this.setRead(filter, readVal, callbackContext);
         } else if (ACTION_RESTORE_SMS.equals(action)) {
             JSONArray smsList = inputs.optJSONArray(0);
             result = this.restoreSMS(smsList, callbackContext);
@@ -433,6 +438,42 @@ extends CordovaPlugin {
                 boolean matchContent = fcontent.length() > 0 && body.equals(fcontent);
                 if (!matchId && !matchRead && !matchAddr && !matchContent) continue;
                 ctx.getContentResolver().delete(uri, "_id=" + id, (String[])null);
+                ++n;
+            }
+            callbackContext.success(n);
+        }
+        catch (Exception e) {
+            callbackContext.error(e.toString());
+        }
+        return null;
+    }
+
+    private PluginResult setRead(JSONObject filter, Boolean readVal, CallbackContext callbackContext) {
+        Log.d(LOGTAG, ACTION_SET_READ_SMS);
+        String uri_filter = filter.has(BOX) ? filter.optString(BOX) : "inbox";
+        int fread = filter.has(READ) ? filter.optInt(READ) : -1;
+        int fid = filter.has("_id") ? filter.optInt("_id") : -1;
+        String faddress = filter.optString(ADDRESS);
+        String fcontent = filter.optString(BODY);
+        Activity ctx = this.cordova.getActivity();
+        int n = 0;
+        try {
+            Uri uri = Uri.parse((SMS_URI_ALL + uri_filter));
+            Cursor cur = ctx.getContentResolver().query(uri, (String[])null, "", (String[])null, null);
+            while (cur.moveToNext()) {
+                int id = cur.getInt(cur.getColumnIndex("_id"));
+                boolean matchId = fid > -1 && fid == id;
+                int read = cur.getInt(cur.getColumnIndex(READ));
+                boolean matchRead = fread > -1 && fread == read;
+                String address = cur.getString(cur.getColumnIndex(ADDRESS)).trim();
+                boolean matchAddr = faddress.length() > 0 && address.equals(faddress);
+                String body = cur.getString(cur.getColumnIndex(BODY)).trim();
+                boolean matchContent = fcontent.length() > 0 && body.equals(fcontent);
+                if (!matchId && !matchRead && !matchAddr && !matchContent) continue;
+                ContentValues values = new ContentValues();
+                //readVal = true | false
+                values.put("read", readVal);
+                ctx.getContentResolver().update(uri, values, "_id=" + id, (String[]) null);
                 ++n;
             }
             callbackContext.success(n);
