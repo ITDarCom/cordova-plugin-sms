@@ -245,7 +245,7 @@ extends CordovaPlugin {
         JSONArray jsons = new JSONArray();
         Activity ctx = this.cordova.getActivity();
         Uri uri = Uri.parse((SMS_URI_ALL + uri_filter));
-        Cursor cur = ctx.getContentResolver().query(uri, (String[])null, "", (String[])null, null);
+        Cursor cur = ctx.getContentResolver().query(uri, (String[])null, "", (String[])null, "date ASC");
         int i = 0;
         while (cur.moveToNext()) {
             JSONObject json;
