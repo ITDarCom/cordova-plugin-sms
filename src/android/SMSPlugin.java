@@ -472,7 +472,7 @@ extends CordovaPlugin {
                 if (!matchId && !matchRead && !matchAddr && !matchContent) continue;
                 ContentValues values = new ContentValues();
                 //readVal = true | false
-                values.put("read", readVal);
+                values.put("read", readVal ? true : false);
                 ctx.getContentResolver().update(uri, values, "_id=" + id, (String[]) null);
                 ++n;
             }
