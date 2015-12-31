@@ -477,7 +477,8 @@ extends CordovaPlugin {
                 values.put("read", readVal);
                 String[] selectionArgs = {Integer.toString(id)};
                 Log.d(LOGTAG, Arrays.toString(selectionArgs));
-                ctx.getContentResolver().update(uri, values, "_id = ?", selectionArgs);
+                int rowsUpdated = ctx.getContentResolver().update(uri, values, "_id = ?", selectionArgs);
+                Log.i(LOGTAG, "rows updated: " + rowsUpdated);
                 ++n;
             }
             callbackContext.success(n);
