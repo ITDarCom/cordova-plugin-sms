@@ -20,6 +20,7 @@ import android.util.Log;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -474,7 +475,9 @@ extends CordovaPlugin {
                 //readVal = true | false
                 Log.d(LOGTAG, readVal.toString());
                 values.put("read", readVal);
-                ctx.getContentResolver().update(uri, values, "_id=" + id, (String[]) null);
+                String[] selectionArgs = {Integer.toString(id)};
+                Log.d(LOGTAG, Arrays.toString(selectionArgs));
+                ctx.getContentResolver().update(uri, values, "_id = ?", selectionArgs);
                 ++n;
             }
             callbackContext.success(n);
