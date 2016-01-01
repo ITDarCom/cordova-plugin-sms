@@ -241,7 +241,7 @@ extends CordovaPlugin {
         int fid = filter.has("_id") ? filter.optInt("_id") : -1;
         String faddress = filter.optString(ADDRESS);
         String fcontent = filter.optString(BODY);
-        //int indexFrom = filter.has("indexFrom") ? filter.optInt("indexFrom") : 0;
+        int indexFrom = filter.has("indexFrom") ? filter.optInt("indexFrom") : 0;
         int maxCount = filter.has("maxCount") ? filter.optInt("maxCount") : 10;
         JSONArray jsons = new JSONArray();
         Activity ctx = this.cordova.getActivity();
@@ -267,9 +267,8 @@ extends CordovaPlugin {
                     }
                     if (!matchFilter) continue;
 
-                    //if (i < indexFrom) continue;
-                    //if (i >= indexFrom + maxCount) break;
-                    if (i >= maxCount) break;
+                    if (i < indexFrom) continue;
+                    if (i >= indexFrom + maxCount) break;
                     ++i;
 
                     if ((json = this.getJsonFromCursor(cur)) == null) {
