@@ -246,37 +246,39 @@ extends CordovaPlugin {
         JSONArray jsons = new JSONArray();
         Activity ctx = this.cordova.getActivity();
         Uri uri = Uri.parse((SMS_URI_ALL + uri_filter));
-        Cursor cur = ctx.getContentResolver().query(uri, (String[])null, "", (String[])null, "date ASC");
-        int i = 0;
-        while (cur.moveToNext()) {
-            JSONObject json;
-            boolean matchFilter = false;
-            if (fid > -1) {
-                matchFilter = (fid == cur.getInt(cur.getColumnIndex("_id")));
-            } else if (fread > -1) {
-                matchFilter = (fread == cur.getInt(cur.getColumnIndex(READ)));
-            } else if (faddress.length() > 0) {
-                matchFilter = faddress.equals(cur.getString(cur.getColumnIndex(ADDRESS)).trim());
-            } else if (fcontent.length() > 0) {
-                matchFilter = fcontent.equals(cur.getString(cur.getColumnIndex(BODY)).trim());
-            } else {
-                matchFilter = true;
-            }
-            if (! matchFilter) continue;
-            
-            if (i < indexFrom) continue;
-            if (i >= indexFrom + maxCount) break;
-            ++i;
+        Cursor cur = ctx.getContentResolver().query(uri, (String[])null, "", (String[])null, "date DESC");
+        if (cur.moveToFirst()) { // must check the result to prevent exception
+            int i = 0;
+            while (cur.moveToNext()) {
+                JSONObject json;
+                boolean matchFilter = false;
+                if (fid > -1) {
+                    matchFilter = (fid == cur.getInt(cur.getColumnIndex("_id")));
+                } else if (fread > -1) {
+                    matchFilter = (fread == cur.getInt(cur.getColumnIndex(READ)));
+                } else if (faddress.length() > 0) {
+                    matchFilter = faddress.equals(cur.getString(cur.getColumnIndex(ADDRESS)).trim());
+                } else if (fcontent.length() > 0) {
+                    matchFilter = fcontent.equals(cur.getString(cur.getColumnIndex(BODY)).trim());
+                } else {
+                    matchFilter = true;
+                }
+                if (!matchFilter) continue;
 
-            if ((json = this.getJsonFromCursor(cur)) == null) {
-                callbackContext.error("failed to get json from cursor");
-                cur.close();
-                return null;
+                if (i < indexFrom) continue;
+                if (i >= indexFrom + maxCount) break;
+                ++i;
+
+                if ((json = this.getJsonFromCursor(cur)) == null) {
+                    callbackContext.error("failed to get json from cursor");
+                    cur.close();
+                    return null;
+                }
+                jsons.put((Object) json);
             }
-            jsons.put((Object)json);
+            cur.close();
+            callbackContext.success(jsons);
         }
-        cur.close();
-        callbackContext.success(jsons);
         return null;
     }
 
