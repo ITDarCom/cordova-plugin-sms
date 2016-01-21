@@ -247,7 +247,7 @@ extends CordovaPlugin {
         Activity ctx = this.cordova.getActivity();
         try {
             Uri uri = Uri.parse((SMS_URI_ALL + uri_filter));
-            Cursor cur = ctx.getContentResolver().query(uri, (String[])null, "", (String[])null, "date DESC");
+            Cursor cur = ctx.getContentResolver().query(uri, (String[])null, "", (String[])null, "date DESC, _id DESC");
             if (cur != null) {
                 int i = 0;
                 cur.moveToFirst();
